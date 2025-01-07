@@ -21,10 +21,10 @@ function RootLayout() {
             }}
           >
             <Stack.Screen name="index" options={{ title: "Loading" }} />
-            <Stack.Screen name="onboarding" options={{ title: "Onboarding" }} />
+           
             
             <Stack.Screen name="auth/login" options={{ title: "Login" }} />
-            <Stack.Screen name="auth/registar" options={{ title: "Register" }} />
+            <Stack.Screen name="auth/register" options={{ title: "Register" }} />
           </Stack>
         </PaperProvider>
       </QueryClientProvider>
