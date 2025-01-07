@@ -35,7 +35,7 @@ export default function LoginScreen() {
         if (response.user.completedProfile) {
           router.replace("/doctor/dashboard");
         } else {
-          router.replace("/profile/index");
+          router.replace("/profile");
         }
       } else {
         Alert.alert("Login failed", "Invalid email or password");
