@@ -17,12 +17,12 @@ interface Shift {
 const ScheduleShifts: React.FC = () => {
   const { schedule, fetchSchedule } = useSchedule(); // Use the custom hook
   const [userId, setUserId] = useState<string | null>(null);
-  const [shifts, setShifts] = useState<Shift[]>([]); 
-  const [selectedDate, setSelectedDate] = useState<string>(""); 
+  const [shifts, setShifts] = useState<Shift[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>("");
   const [shiftData, setShiftData] = useState<{ name: string; startTime: string; endTime: string }>({ name: "", startTime: "", endTime: "" });
   const [recurrence, setRecurrence] = useState<string>("none");
-  const [consultationDuration, setConsultationDuration] = useState<number>(60); 
-  const [expandedShift, setExpandedShift] = useState<number | null>(null); 
+  const [consultationDuration, setConsultationDuration] = useState<number>(60);
+  const [expandedShift, setExpandedShift] = useState<number | null>(null);
 
   // Fetch user ID and schedule on component mount
   useEffect(() => {
@@ -30,7 +30,7 @@ const ScheduleShifts: React.FC = () => {
       const storedUserId = await AsyncStorage.getItem("userId");
       if (storedUserId) {
         setUserId(storedUserId);
-        fetchSchedule(storedUserId); 
+        fetchSchedule(storedUserId);
       }
     };
     getUserId();
@@ -48,7 +48,7 @@ const ScheduleShifts: React.FC = () => {
 
       if (nextSlot <= end) {
         slots.push({
-          startTime: start.toISOString().substr(11, 5), 
+          startTime: start.toISOString().substr(11, 5),
           endTime: nextSlot.toISOString().substr(11, 5),
         });
       }
@@ -75,7 +75,7 @@ const ScheduleShifts: React.FC = () => {
         dates.push(newDate.toISOString().split("T")[0]);
       }
     } else {
-      dates.push(startDate); 
+      dates.push(startDate);
     }
 
     return dates;
@@ -210,12 +210,11 @@ const ScheduleShifts: React.FC = () => {
 
         {/* Render saved schedule if available for today */}
         {schedule && schedule[getTodayDate()] ? (
-          <ScheduleComponent schedule={schedule} onEditSchedule={handleEditSchedule} />
+          <ScheduleComponent schedule={schedule} />
         ) : (
           <ScheduleShiftForm
             onAddShift={handleAddShift}
             onSaveSchedule={handleSaveSchedule}
-            shifts={shifts}
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             shiftData={shiftData}

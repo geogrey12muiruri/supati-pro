@@ -35,7 +35,7 @@ export default function LoginScreen() {
       if (response.token) {
         await AsyncStorage.setItem("userToken", response.token);
         await AsyncStorage.setItem("userId", response.user._id);
-        dispatch(loginAction({ user: response.user, token: response.token }));
+        dispatch(loginAction({ user: response.user, token: response.token, professionalId: response.professionalId }));
         if (response.user.completedProfile) {
           router.replace("/doctor/dashboard");
         } else {

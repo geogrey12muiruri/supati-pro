@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
     setAppointments,
     setError,
@@ -32,13 +33,14 @@ const useAppointments = () => {
         console.log('User:', user); // Log user information
 
         const fetchAppointments = async () => {
-            if (!user || !user.userId) return;
+            const storedUserId = await AsyncStorage.getItem('userId');
+            if (!storedUserId) return;
     
             dispatch(setLoading(true));
             dispatch(setError(null));
     
             try {
-                const userId = user.userId;
+                const userId = storedUserId;
                 const url = `https://medplus-health.onrender.com/api/appointments/user/${userId}`;
     
                 const response = await fetch(url);
@@ -81,7 +83,7 @@ const useAppointments = () => {
         };
     
         fetchAppointments();
-    }, [dispatch, user.userId]); // Added `user.userId` to the dependency array
+    }, [dispatch, user]); // Removed `user.userId` from the dependency array
     
 
     const confirmAppointment = async (appointmentId) => {

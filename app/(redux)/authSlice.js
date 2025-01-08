@@ -73,7 +73,7 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginAction: (state, action) => {
-      const { user, token } = action.payload;
+      const { user, token, professionalId } = action.payload;
       if (user) {
         state.user = {
           email: user.email,
@@ -89,13 +89,14 @@ const authSlice = createSlice({
           updatedAt: user.updatedAt,
           phoneNumber: user.phoneNumber,
           completedProfile: user.completedProfile,
+          profileImage: user.profileImage,
         };
         state.name = user.firstName + ' ' + user.lastName;
         state.email = user.email;
         state.userId = user._id;
         state.userType = user.userType;
         state.isAuthenticated = true;
-        state.professional = user.professional || null;
+        state.professional = professionalId || null;
         state.profileImage = user.profileImage || null;
         state.loading = false;
       }

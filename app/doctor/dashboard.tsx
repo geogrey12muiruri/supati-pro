@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Dimensions, ActivityIndicator, TextInput, Modal, Button, FlatList } from 'react-native';
 
 import { selectUser } from '../(redux)/authSlice';
-import { addNotification, selectNotifications } from '../(redux)/appointmentSlice'; // Import Redux actions and selectors
+import { addNotification, selectNotifications, setAppointments, setError, setLoading } from '../(redux)/appointmentSlice'; // Import Redux actions and selectors
 import { useRouter } from 'expo-router';
 import moment from 'moment';
 
@@ -12,7 +12,6 @@ import useSchedule from '../../hooks/useSchedule';
 import { useRoute } from '@react-navigation/native';
 import useSocketNotifications from '@/hooks/useSocketNotification';
 import { Ionicons, FontAwesome, MaterialIcons, Entypo } from '@expo/vector-icons';
-
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -26,6 +25,7 @@ const DashboardScreen: React.FC = () => {
   const [scheduleError, setScheduleError] = useState<string | null>(null);
   const dispatch = useDispatch();
   const notifications = useSelector(selectNotifications); // Get notifications from Redux state
+  const [appointments, setAppointmentsState] = useState([]); // Local state for appointments
   const [newNotificationsCount, setNewNotificationsCount] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const userIdRef = useRef<string | null>(null);
@@ -80,6 +80,34 @@ const DashboardScreen: React.FC = () => {
     console.log('Schedule data:', schedule); // Log the schedule data to examine its structure
   }, [schedule]);
 
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      const storedUserId = await AsyncStorage.getItem('userId');
+      if (!storedUserId) return;
+
+      dispatch(setLoading(true));
+      dispatch(setError(null));
+
+      try {
+        const userId = storedUserId;
+        const url = `https://medplus-health.onrender.com/api/appointments/doctor/${userId}`;
+
+        const response = await fetch(url);
+        const allData = await response.json();
+        const appointmentsArray = Array.isArray(allData) ? allData : [];
+
+        setAppointmentsState(appointmentsArray); // Set local state with fetched appointments
+      } catch (err) {
+        console.error('Error fetching appointments:', err.message);
+        dispatch(setError('Error fetching appointments'));
+      } finally {
+        dispatch(setLoading(false));
+      }
+    };
+
+    fetchAppointments();
+  }, [dispatch]);
+
   const handleViewPatient = (patientId: string, appointmentId: string) => {
     router.push(`/patient/${patientId}?appointmentId=${appointmentId}`);
   };
@@ -111,10 +139,10 @@ const DashboardScreen: React.FC = () => {
 
   const renderOverviewCards = () => {
     const cardData = [
-      { title: 'Total Appointments', count: 0, color: '#ff7f50', icon: <Ionicons name="calendar" size={24} color="#fff" /> },
-      { title: 'Upcoming', count: 0, color: '#4CAF50', icon: <FontAwesome name="clock-o" size={24} color="#fff" /> },
-      { title: 'Requested', count: 0, color: '#2196F3', icon: <MaterialIcons name="request-quote" size={24} color="#fff" /> },
-      { title: 'Completed', count: 0, color: '#f44336', icon: <Entypo name="check" size={24} color="#fff" /> },
+      { title: 'Total Appointments', count: appointments.length, color: '#ff7f50', icon: <Ionicons name="calendar" size={24} color="#fff" /> },
+      { title: 'Upcoming', count: appointments.filter(app => app.status === 'confirmed').length, color: '#4CAF50', icon: <FontAwesome name="clock-o" size={24} color="#fff" /> },
+      { title: 'Requested', count: appointments.filter(app => app.status === 'pending').length, color: '#2196F3', icon: <MaterialIcons name="request-quote" size={24} color="#fff" /> },
+      { title: 'Completed', count: appointments.filter(app => app.status === 'completed').length, color: '#f44336', icon: <Entypo name="check" size={24} color="#fff" /> },
     ];
 
     return (
