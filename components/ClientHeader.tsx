@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useDispatch, useSelector } from 'react-redux'; // Import useDispatch and useSelector
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { Badge } from 'react-native-paper'; // Updated import
+import { logoutAction } from '../app/(redux)/authSlice'; // Import logoutAction
 
 import Colors from './Shared/Colors';
 
 const ClientHeader: React.FC<{ title: string }> = ({ title }) => {
   const router = useRouter();
-  const [notificationCount, setNotificationCount] = useState(0);
+  const dispatch = useDispatch();
+  const profileImage = useSelector((state) => state.auth.profileImage); // Get profile image from Redux state
 
   useEffect(() => {
     return () => {
@@ -16,29 +18,23 @@ const ClientHeader: React.FC<{ title: string }> = ({ title }) => {
   }, []);
 
   const handleLogout = () => {
+    dispatch(logoutAction()); // Dispatch logout action
     router.push('/auth/login');
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.leftSection}>
-        <View style={styles.profileImageFallback}>
-          <Text style={styles.profileInitial}>A</Text>
-        </View>
+        {profileImage ? (
+          <Image source={{ uri: profileImage }} style={styles.profileImage} />
+        ) : (
+          <View style={styles.profileImageFallback}>
+            <Text style={styles.profileInitial}>A</Text>
+          </View>
+        )}
       </View>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.rightSection}>
-        <TouchableOpacity style={styles.notificationButton}>
-          <AntDesign name="bells" size={24} color="black" />
-          {notificationCount > 0 && (
-            <Badge
-              size={24}
-              style={styles.badgeContainer}
-            >
-              {notificationCount}
-            </Badge>
-          )}
-        </TouchableOpacity>
         <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
           <AntDesign name="logout" size={24} color="black" />
         </TouchableOpacity>
@@ -92,17 +88,6 @@ const styles = StyleSheet.create({
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  notificationButton: {
-    padding: 8,
-    position: 'relative',
-  },
-  badgeContainer: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: 'red',
-    color: 'white',
   },
   logoutButton: {
     padding: 8,

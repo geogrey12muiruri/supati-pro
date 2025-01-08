@@ -73,11 +73,9 @@ export default function RegisterScreen() {
 
   return (
     <Background>
-      <TouchableOpacity onPress={() => router.back()}>
-        <Text>Back</Text>
-      </TouchableOpacity>
+      
       <Logo />
-      <Header>Welcome.</Header>
+      <Header>Create Account</Header>
       {!isVerifying ? (
         <>
           <TextInput

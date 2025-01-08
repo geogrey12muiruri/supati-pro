@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { TouchableOpacity, StyleSheet, View, Alert } from "react-native";
 import { Text } from "react-native-paper";
-import { useRouter } from "expo-router"; // Import useRouter from expo-router
+import { useRouter } from "expo-router";
 import Background from "../../components/Background";
 import Logo from "../../components/Logo";
 import Header from "../../components/Header";
@@ -10,11 +10,14 @@ import TextInput from "../../components/TextInput";
 import { theme } from "../../core/theme";
 import { emailValidator } from "../../helpers/emailValidator";
 import { passwordValidator } from "../../helpers/passwordValidator";
-import { loginUser } from "../(services)/api/api"; // Import the loginUser function
+import { loginUser } from "../(services)/api/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useDispatch } from "react-redux";
+import { loginAction } from "../(redux)/authSlice";
 
 export default function LoginScreen() {
-  const router = useRouter(); // Use useRouter hook
+  const router = useRouter();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
 
@@ -32,6 +35,7 @@ export default function LoginScreen() {
       if (response.token) {
         await AsyncStorage.setItem("userToken", response.token);
         await AsyncStorage.setItem("userId", response.user._id);
+        dispatch(loginAction({ user: response.user, token: response.token }));
         if (response.user.completedProfile) {
           router.replace("/doctor/dashboard");
         } else {
@@ -48,7 +52,7 @@ export default function LoginScreen() {
   return (
     <Background>
       <Logo />
-      <Header>Hello.</Header>
+      <Header>Welcome back.</Header>
       <TextInput
         label="Email"
         returnKeyType="next"

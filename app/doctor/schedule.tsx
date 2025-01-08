@@ -1,224 +1,233 @@
-import React, { useState, useRef } from 'react';
-import {
-  StyleSheet,
-  Dimensions,
-  TouchableWithoutFeedback,
-  SafeAreaView,
-  View,
-  Text,
-  TouchableOpacity,
-} from 'react-native';
-import moment from 'moment';
-import Swiper from 'react-native-swiper';
+import React, { useState, useEffect } from "react";
+import { View, Text, Alert, ScrollView } from "react-native";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import useSchedule from "../../hooks/useSchedule"; // Import the custom hook for managing schedule data
+import ScheduleComponent from "../../components/ScheduleComponent"; // Component to display the schedule
+import ScheduleShiftForm from "../../components/ScheduleShiftForm"; // Component for adding/editing shifts
 
-const { width } = Dimensions.get('window');
-
-export default function Example() {
-  const swiper = useRef();
-  const [value, setValue] = useState(new Date());
-  const [week, setWeek] = useState(0);
-
-  const weeks = React.useMemo(() => {
-    const start = moment().add(week, 'weeks').startOf('week');
-
-    return [-1, 0, 1].map(adj => {
-      return Array.from({ length: 7 }).map((_, index) => {
-        const date = moment(start).add(adj, 'week').add(index, 'day');
-
-        return {
-          weekday: date.format('ddd'),
-          date: date.toDate(),
-        };
-      });
-    });
-  }, [week]);
-
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Your Schedule</Text>
-        </View>
-
-        <View style={styles.picker}>
-          <Swiper
-            index={1}
-            ref={swiper}
-            loop={false}
-            showsPagination={false}
-            onIndexChanged={ind => {
-              if (ind === 1) {
-                return;
-              }
-              setTimeout(() => {
-                const newIndex = ind - 1;
-                const newWeek = week + newIndex;
-                setWeek(newWeek);
-                setValue(moment(value).add(newIndex, 'week').toDate());
-                swiper.current.scrollTo(1, false);
-              }, 100);
-            }}>
-            {weeks.map((dates, index) => (
-              <View style={styles.itemRow} key={index}>
-                {dates.map((item, dateIndex) => {
-                  const isActive =
-                    value.toDateString() === item.date.toDateString();
-                  return (
-                    <TouchableWithoutFeedback
-                      key={dateIndex}
-                      onPress={() => setValue(item.date)}>
-                      <View
-                        style={[
-                          styles.item,
-                          isActive && {
-                            backgroundColor: '#111',
-                            borderColor: '#111',
-                          },
-                        ]}>
-                        <Text
-                          style={[
-                            styles.itemWeekday,
-                            isActive && { color: '#fff' },
-                          ]}>
-                          {item.weekday}
-                        </Text>
-                        <Text
-                          style={[
-                            styles.itemDate,
-                            isActive && { color: '#fff' },
-                          ]}>
-                          {item.date.getDate()}
-                        </Text>
-                      </View>
-                    </TouchableWithoutFeedback>
-                  );
-                })}
-              </View>
-            ))}
-          </Swiper>
-        </View>
-
-        <View style={{ flex: 1, paddingHorizontal: 16, paddingVertical: 24 }}>
-          <Text style={styles.subtitle}>{value.toDateString()}</Text>
-          <View style={styles.placeholder}>
-            <View style={styles.placeholderInset}>
-              {/* Replace with your content */}
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.footer}>
-          <TouchableOpacity
-            onPress={() => {
-              // handle onPress
-            }}>
-            <View style={styles.btn}>
-              <Text style={styles.btnText}>Schedule</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </SafeAreaView>
-  );
+interface Shift {
+  name: string;
+  startTime: string;
+  endTime: string;
+  date: string;
+  slots: { startTime: string; endTime: string }[];
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingVertical: 24,
-  },
-  header: {
-    paddingHorizontal: 16,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#1d1d1d',
-    marginBottom: 12,
-  },
-  picker: {
-    flex: 1,
-    maxHeight: 74,
-    paddingVertical: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  subtitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: '#999999',
-    marginBottom: 12,
-  },
-  footer: {
-    marginTop: 'auto',
-    paddingHorizontal: 16,
-  },
-  /** Item */
-  item: {
-    flex: 1,
-    height: 50,
-    marginHorizontal: 4,
-    paddingVertical: 6,
-    paddingHorizontal: 4,
-    borderWidth: 1,
-    borderRadius: 8,
-    borderColor: '#e3e3e3',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  itemRow: {
-    width: width,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-  },
-  itemWeekday: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#737373',
-    marginBottom: 4,
-  },
-  itemDate: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#111',
-  },
-  /** Placeholder */
-  placeholder: {
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-    height: 400,
-    marginTop: 0,
-    padding: 0,
-    backgroundColor: 'transparent',
-  },
-  placeholderInset: {
-    borderWidth: 4,
-    borderColor: '#e5e7eb',
-    borderStyle: 'dashed',
-    borderRadius: 9,
-    flexGrow: 1,
-    flexShrink: 1,
-    flexBasis: 0,
-  },
-  /** Button */
-  btn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderWidth: 1,
-    backgroundColor: '#007aff',
-    borderColor: '#007aff',
-  },
-  btnText: {
-    fontSize: 18,
-    lineHeight: 26,
-    fontWeight: '600',
-    color: '#fff',
-  },
-});
+const ScheduleShifts: React.FC = () => {
+  const { schedule, fetchSchedule } = useSchedule(); // Use the custom hook
+  const [userId, setUserId] = useState<string | null>(null);
+  const [shifts, setShifts] = useState<Shift[]>([]); 
+  const [selectedDate, setSelectedDate] = useState<string>(""); 
+  const [shiftData, setShiftData] = useState<{ name: string; startTime: string; endTime: string }>({ name: "", startTime: "", endTime: "" });
+  const [recurrence, setRecurrence] = useState<string>("none");
+  const [consultationDuration, setConsultationDuration] = useState<number>(60); 
+  const [expandedShift, setExpandedShift] = useState<number | null>(null); 
+
+  // Fetch user ID and schedule on component mount
+  useEffect(() => {
+    const getUserId = async () => {
+      const storedUserId = await AsyncStorage.getItem("userId");
+      if (storedUserId) {
+        setUserId(storedUserId);
+        fetchSchedule(storedUserId); 
+      }
+    };
+    getUserId();
+  }, []);
+
+  // Generate time slots based on start time, end time, and consultation duration
+  const generateTimeSlots = (startTime: string, endTime: string, duration: number) => {
+    const slots: { startTime: string; endTime: string }[] = [];
+    const start = new Date(`1970-01-01T${startTime}:00Z`);
+    const end = new Date(`1970-01-01T${endTime}:00Z`);
+
+    while (start < end) {
+      const nextSlot = new Date(start);
+      nextSlot.setMinutes(nextSlot.getMinutes() + duration + 10); // Add waiting time
+
+      if (nextSlot <= end) {
+        slots.push({
+          startTime: start.toISOString().substr(11, 5), 
+          endTime: nextSlot.toISOString().substr(11, 5),
+        });
+      }
+      start.setMinutes(start.getMinutes() + duration + 10);
+    }
+    return slots;
+  };
+
+  // Generate recurrence dates (daily, weekly, none)
+  const generateRecurrenceDates = (startDate: string, recurrenceType: string) => {
+    const dates: string[] = [];
+    const start = new Date(startDate);
+
+    if (recurrenceType === "daily") {
+      for (let i = 0; i < 7; i++) {
+        const newDate = new Date(start);
+        newDate.setDate(start.getDate() + i);
+        dates.push(newDate.toISOString().split("T")[0]);
+      }
+    } else if (recurrenceType === "weekly") {
+      for (let i = 0; i < 4; i++) {
+        const newDate = new Date(start);
+        newDate.setDate(start.getDate() + i * 7);
+        dates.push(newDate.toISOString().split("T")[0]);
+      }
+    } else {
+      dates.push(startDate); 
+    }
+
+    return dates;
+  };
+
+  // Add a new shift
+  const handleAddShift = () => {
+    if (!shiftData.name || !shiftData.startTime || !shiftData.endTime || !selectedDate || !consultationDuration) {
+      Alert.alert("Please fill out all fields!");
+      return;
+    }
+
+    const recurrenceDates = generateRecurrenceDates(selectedDate, recurrence);
+    const newShifts = recurrenceDates.map((date) => ({
+      name: shiftData.name,
+      startTime: shiftData.startTime,
+      endTime: shiftData.endTime,
+      date,
+      slots: generateTimeSlots(shiftData.startTime, shiftData.endTime, consultationDuration),
+    }));
+
+    setShifts((prevShifts) => [...prevShifts, ...newShifts]);
+    setShiftData({ name: "", startTime: "", endTime: "" });
+  };
+
+  // Save the schedule to the server
+  const handleSaveSchedule = async () => {
+    if (shifts.length === 0) {
+      Alert.alert("Please add some shifts before saving!");
+      return;
+    }
+
+    const formattedShifts = shifts.map((shift) => ({
+      name: shift.name,
+      startTime: shift.startTime,
+      endTime: shift.endTime,
+      date: shift.date,
+      slots: shift.slots,
+    }));
+
+    const payload = {
+      professionalId: userId,
+      availability: formattedShifts.reduce((acc: { [key: string]: any[] }, shift) => {
+        const dayKey = shift.date;
+        if (!acc[dayKey]) {
+          acc[dayKey] = [];
+        }
+        acc[dayKey].push({
+          shiftName: shift.name,
+          startTime: shift.startTime,
+          endTime: shift.endTime,
+          slots: shift.slots,
+        });
+        return acc;
+      }, {}),
+      recurrence,
+    };
+
+    try {
+      await axios.put("https://medplus-health.onrender.com/api/schedule", payload);
+      Alert.alert("Your schedule has been saved successfully!");
+      setShifts([]); // Clear shifts after saving
+    } catch (error) {
+      Alert.alert("Error saving schedule.");
+    }
+  };
+
+  // Toggle shift slots expansion
+  const toggleShiftSlots = (index: number) => {
+    setExpandedShift(expandedShift === index ? null : index);
+  };
+
+  // Render shift preview for selected date
+  const renderShiftPreview = () => {
+    const shiftsForSelectedDate = shifts.filter((shift) => shift.date === selectedDate);
+
+    if (shiftsForSelectedDate.length === 0) {
+      return <Text style={{ color: 'gray' }}>No shifts added for this date yet.</Text>;
+    }
+
+    return (
+      <View style={{ marginTop: 16, padding: 16, borderTopWidth: 1, backgroundColor: '#f0f0f0' }}>
+        <Text style={{ fontWeight: 'bold', fontSize: 18, color: '#4a4a4a' }}>Shifts for {selectedDate}</Text>
+        <ScrollView horizontal>
+          {shiftsForSelectedDate.map((shift, index) => (
+            <View
+              key={index}
+              style={{ width: 192, padding: 16, backgroundColor: 'white', borderWidth: 1, borderColor: '#d1d1d1', borderRadius: 8, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4, marginRight: 16 }}
+            >
+              <Text style={{ fontWeight: 'bold', color: '#333' }} onPress={() => toggleShiftSlots(index)}>
+                {shift.name}
+              </Text>
+              <Text style={{ color: '#666' }}>
+                {shift.startTime} - {shift.endTime}
+              </Text>
+
+              {expandedShift === index && (
+                <View style={{ marginTop: 8 }}>
+                  {shift.slots.map((slot, idx) => (
+                    <Text key={idx} style={{ color: '#999' }}>
+                      {slot.startTime} - {slot.endTime}
+                    </Text>
+                  ))}
+                </View>
+              )}
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+    );
+  };
+
+  // Handle editing schedule for a specific date
+  const handleEditSchedule = (date: string) => {
+    setSelectedDate(date);
+    setShifts(schedule[date] || []);
+  };
+
+  // Get today's date in YYYY-MM-DD format
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  };
+
+  return (
+    <View style={{ flex: 1, padding: 24 }}>
+      {/* Top Section */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Schedule Your Day</Text>
+      </View>
+
+      {/* Render saved schedule if available for today */}
+      {schedule && schedule[getTodayDate()] ? (
+        <ScheduleComponent schedule={schedule} onEditSchedule={handleEditSchedule} />
+      ) : (
+        <ScheduleShiftForm
+          onAddShift={handleAddShift}
+          onSaveSchedule={handleSaveSchedule}
+          shifts={shifts}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          shiftData={shiftData}
+          setShiftData={setShiftData}
+          recurrence={recurrence}
+          setRecurrence={setRecurrence}
+          consultationDuration={consultationDuration}
+          setConsultationDuration={setConsultationDuration}
+          renderShiftPreview={renderShiftPreview}
+        />
+      )}
+    </View>
+  );
+};
+
+export default ScheduleShifts;

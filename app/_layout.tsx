@@ -1,11 +1,14 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-
+import { Stack } from 'expo-router';
+import { View } from 'react-native';
+import { Provider as ReduxProvider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { DefaultTheme, PaperProvider } from 'react-native-paper';
-import { Stack } from 'expo-router';
-import { DarkTheme } from '@react-navigation/native';
+import { Provider as PaperProvider } from 'react-native-paper';
+
+
+import store, { persistor } from './(redux)/store'; // Import the store and persistor
 
 function RootLayout() {
   const colorScheme = useColorScheme();
@@ -30,7 +33,11 @@ function RootLayout() {
 
 function App() {
   return (
-    <RootLayout />
+    <ReduxProvider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <RootLayout />
+      </PersistGate>
+    </ReduxProvider>
   );
 }
 
