@@ -3,9 +3,7 @@ import { View, Text } from 'react-native';
 
 import { StatusBar } from 'expo-status-bar';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import queryClient from "./(services)/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { DefaultTheme, PaperProvider, ThemeProvider } from 'react-native-paper';
+import { DefaultTheme, PaperProvider } from 'react-native-paper';
 import { Stack } from 'expo-router';
 import { DarkTheme } from '@react-navigation/native';
 
@@ -13,24 +11,20 @@ function RootLayout() {
   const colorScheme = useColorScheme();
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <QueryClientProvider client={queryClient}>
-        <PaperProvider>
-          <Stack
-            screenOptions={{
-              headerShown: false, 
-            }}
-          >
-            <Stack.Screen name="index" options={{ title: "Loading" }} />
-           
-            
-            <Stack.Screen name="auth/login" options={{ title: "Login" }} />
-            <Stack.Screen name="auth/register" options={{ title: "Register" }} />
-          </Stack>
-        </PaperProvider>
-      </QueryClientProvider>
+    <View style={{ flex: 1 }}>
+      <PaperProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false, 
+          }}
+        >
+          <Stack.Screen name="index" options={{ title: "Loading" }} />
+          <Stack.Screen name="auth/login" options={{ title: "Login" }} />
+          <Stack.Screen name="auth/register" options={{ title: "Register" }} />
+        </Stack>
+      </PaperProvider>
       <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
-    </ThemeProvider>
+    </View>
   );
 }
 
