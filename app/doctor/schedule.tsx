@@ -201,32 +201,34 @@ const ScheduleShifts: React.FC = () => {
   };
 
   return (
-    <ScrollView style={{ flex: 1, padding: 24 }}>
-      {/* Top Section */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Schedule Your Day</Text>
-      </View>
+    <View style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ padding: 24 }}>
+        {/* Top Section */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+          <Text style={{ fontSize: 24, fontWeight: 'bold' }}>Schedule Your Day</Text>
+        </View>
 
-      {/* Render saved schedule if available for today */}
-      {schedule && schedule[getTodayDate()] ? (
-        <ScheduleComponent schedule={schedule} onEditSchedule={handleEditSchedule} />
-      ) : (
-        <ScheduleShiftForm
-          onAddShift={handleAddShift}
-          onSaveSchedule={handleSaveSchedule}
-          shifts={shifts}
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-          shiftData={shiftData}
-          setShiftData={setShiftData}
-          recurrence={recurrence}
-          setRecurrence={setRecurrence}
-          consultationDuration={consultationDuration}
-          setConsultationDuration={setConsultationDuration}
-          renderShiftPreview={renderShiftPreview}
-        />
-      )}
-    </ScrollView>
+        {/* Render saved schedule if available for today */}
+        {schedule && schedule[getTodayDate()] ? (
+          <ScheduleComponent schedule={schedule} onEditSchedule={handleEditSchedule} />
+        ) : (
+          <ScheduleShiftForm
+            onAddShift={handleAddShift}
+            onSaveSchedule={handleSaveSchedule}
+            shifts={shifts}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            shiftData={shiftData}
+            setShiftData={setShiftData}
+            recurrence={recurrence}
+            setRecurrence={setRecurrence}
+            consultationDuration={consultationDuration}
+            setConsultationDuration={setConsultationDuration}
+            renderShiftPreview={renderShiftPreview}
+          />
+        )}
+      </ScrollView>
+    </View>
   );
 };
 

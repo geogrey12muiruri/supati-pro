@@ -5,6 +5,7 @@ import moment from 'moment';
 import Colors from '../../components/Shared/Colors';
 import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 interface Transaction {
   id: string;
@@ -48,28 +49,30 @@ const IncomeScreen: React.FC = () => {
   );
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Icon name="arrow-left" size={24} color={Colors.primary} />
-      </TouchableOpacity>
-      <Text style={styles.title}>Income Overview</Text>
-      <Text style={styles.totalIncome}>Total Income: ${totalIncome}</Text>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Search by patient name"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-      <FlatList
-        data={filteredTransactions}
-        renderItem={renderTransactionItem}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={<Text style={styles.noTransactionsText}>No transactions found.</Text>}
-      />
-      <TouchableOpacity style={styles.exportButton}>
-        <Text style={styles.exportButtonText}>Export Data</Text>
-      </TouchableOpacity>
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <Icon name="arrow-left" size={24} color={Colors.primary} />
+        </TouchableOpacity>
+        <Text style={styles.title}>Income Overview</Text>
+        <Text style={styles.totalIncome}>Total Income: ${totalIncome}</Text>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by patient name"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+        <FlatList
+          data={filteredTransactions}
+          renderItem={renderTransactionItem}
+          keyExtractor={(item) => item.id}
+          ListEmptyComponent={<Text style={styles.noTransactionsText}>No transactions found.</Text>}
+        />
+        <TouchableOpacity style={styles.exportButton}>
+          <Text style={styles.exportButtonText}>Export Data</Text>
+        </TouchableOpacity>
+      </View>
+    </GestureHandlerRootView>
   );
 };
 
